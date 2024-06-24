@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="chatApp">
+    <div class="username" id="username">shahd</div>
+    <div class="messages" id="messages"></div>
+    <div class="send">
+      <input type="text" id="new-Message"/>
+      <button class="send-btn" id="send-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+          <path d="m21.426 11.095-17-8A1 1 0 0 0 3.03 4.242l1.212 4.849L12 12l-7.758 2.909-1.212 4.849a.998.998 0 0 0 1.396 1.147l17-8a1 1 0 0 0 0-1.81z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+          apiKey: "AIzaSyDj18dvQckaxNwmZStFodW9EWuC2JgLUEg",
+          authDomain: "chat-app-a51ef.firebaseapp.com",
+          projectId: "chat-app-a51ef",
+          storageBucket: "chat-app-a51ef.appspot.com",
+          messagingSenderId: "21204500300",
+          appId: "1:21204500300:web:fc470c48935f0c61eed9e9"
+        };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase();
+
+    let userName = prompt('Enter your username');
+    let newMessageInput = document.getElementById('new-Message');
+
+    if (!userName) {
+      userName = prompt('Enter your username');
+    }
+
+    const btn = document.getElementById('send-btn');
+
+    function addMessage() {
+      const messagesRef = ref(db, 'messages/');
+      const newMessageRef = push(messagesRef);
+      set(newMessageRef, {
+        userName: userName,
+        message: newMessageInput.value
+      }).then(() => {
+        newMessageInput.value = '';
+      }).catch((error) => {
+        alert('Error: ' + error.message);
+      });
+    }
+
+    btn.addEventListener('click', addMessage);
+
+    let usernameDisplay = document.getElementById('username');
+    usernameDisplay.innerHTML = userName;
+
+    const messagesRef = ref(db, 'messages/');
+    onValue(messagesRef, (snapshot) => {
+      const messagesContainer = document.getElementById('messages');
+      messagesContainer.innerHTML = ''; // Clear existing messages
+      snapshot.forEach((childSnapshot) => {
+        const messageData = childSnapshot.val();
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        if (messageData.userName === userName) {
+          messageElement.classList.add('recived');
+        }
+        messageElement.innerHTML = `<span class="sender">${messageData.userName}</span><span class="text">${messageData.message}</span>`;
+        messagesContainer.appendChild(messageElement);
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+        <!-- const firebaseConfig = {
+          apiKey: "AIzaSyDj18dvQckaxNwmZStFodW9EWuC2JgLUEg",
+          authDomain: "chat-app-a51ef.firebaseapp.com",
+          projectId: "chat-app-a51ef",
+          storageBucket: "chat-app-a51ef.appspot.com",
+          messagingSenderId: "21204500300",
+          appId: "1:21204500300:web:fc470c48935f0c61eed9e9"
+        }; -->
